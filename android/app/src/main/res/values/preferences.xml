@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/app_name">
+        <CheckBoxPreference
+            android:key="floodguard_enabled"
+            android:title="@string/pref_enabled"
+            android:summary="Enable FloodGuard contribution"
+            android:defaultValue="false" />
+        <ListPreference
+            android:key="language"
+            android:title="@string/pref_language"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:defaultValue="en" />
+    </PreferenceCategory>
+</PreferenceScreen>

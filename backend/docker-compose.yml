@@ -1,0 +1,99 @@
+version: '3.9'
+
+services:
+  # PostgreSQL with PostGIS
+  postgres:
+    image: postgis/postgis:15-3.3
+    environment:
+      POSTGRES_USER: floodguard
+      POSTGRES_PASSWORD: floodguard
+      POSTGRES_DB: floodguard_ke
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U floodguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://floodguard:floodguard@postgres:5432/floodguard_ke
+      REDIS_URL: redis://redis:6379/0
+      REDIS_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: your-super-secret-key-change-in-production-min-32-chars
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      AFRICAS_TALKING_API_KEY: sandbox_key
+      AFRICAS_TALKING_USERNAME: sandbox
+      NASA_BEARER_TOKEN: sandbox_token
+      OPENWEATHER_API_KEY: sandbox_key
+      ENV: development
+      DEBUG: "True"
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Celery Worker
+  celery:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://floodguard:floodguard@postgres:5432/floodguard_ke
+      REDIS_URL: redis://redis:6379/0
+      REDIS_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: your-super-secret-key-change-in-production-min-32-chars
+      ENV: development
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    command: celery -A services.celery_app worker --loglevel=info
+    volumes:
+      - .:/app
+
+  # Celery Beat (scheduler)
+  celery-beat:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://floodguard:floodguard@postgres:5432/floodguard_ke
+      REDIS_URL: redis://redis:6379/0
+      REDIS_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: your-super-secret-key-change-in-production-min-32-chars
+      ENV: development
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    command: celery -A services.celery_app beat --loglevel=info
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  redis_data:

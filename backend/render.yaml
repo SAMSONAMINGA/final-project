@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: floodguard-backend
+    env: python
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: true
+        scope: build
+      - key: DATABASE_URL
+        scope: build
+      - key: REDIS_URL
+        scope: build
+      - key: SECRET_KEY
+        scope: build
+      - key: ALLOWED_ORIGINS
+        scope: build
+      - key: AFRICAS_TALKING_API_KEY
+        scope: build
+      - key: AFRICAS_TALKING_USERNAME
+        scope: build
+      - key: NASA_BEARER_TOKEN
+        scope: build
+      - key: IMERG_BASE_URL
+        scope: build
+      - key: OPENWEATHER_API_KEY
+        scope: build

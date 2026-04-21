@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App strings -->
+    <string name="app_name">FloodGuard KE</string>
+    <string name="app_description">Nationwide flood early warning system for Kenya</string>
+
+    <!-- Screen titles -->
+    <string name="screen_status">Contributing</string>
+    <string name="screen_risk">My Area Risk</string>
+    <string name="screen_alerts">Alerts</string>
+
+    <!-- Labels -->
+    <string name="pref_enabled">Enable FloodGuard</string>
+    <string name="pref_language">Language</string>
+    <string name="current_pressure">Current Pressure</string>
+    <string name="gps_coordinates">GPS Coordinates</string>
+    <string name="upload_count">Uploads Today</string>
+    <string name="battery_impact">Battery Impact</string>
+    <string name="battery_impact_value">&lt; 0.5% per day</string>
+
+    <!-- Risk levels -->
+    <string name="risk_low">Low</string>
+    <string name="risk_medium">Medium</string>
+    <string name="risk_high">High</string>
+    <string name="risk_critical">Critical</string>
+
+    <!-- Action buttons -->
+    <string name="button_enable">Enable</string>
+    <string name="button_disable">Disable</string>
+    <string name="button_test_alert">Send Test Alert</string>
+    <string name="button_grant_permission">Grant Permission</string>
+    <string name="button_next">Next</string>
+    <string name="button_agree">Agree</string>
+
+    <!-- Messages -->
+    <string name="msg_privacy_title">Your Privacy Matters</string>
+    <string name="msg_privacy_body">We collect: Pressure, GPS coordinates. We do NOT collect: Name, phone number, contacts, or personal info.</string>
+    <string name="msg_consent_required">Consent required to enable FloodGuard</string>
+    <string name="msg_location_needed">Location permission required for GPS coordinates</string>
+    <string name="msg_permission_denied">Permission denied. Unable to collect barometer readings.</string>
+
+    <!-- Languages -->
+    <string name="lang_english">English</string>
+    <string name="lang_swahili">Swahili</string>
+    <string name="lang_sheng">Sheng</string>
+
+    <!-- Array values (for language selection) -->
+    <string-array name="language_entries">
+        <item>@string/lang_english</item>
+        <item>@string/lang_swahili</item>
+        <item>@string/lang_sheng</item>
+    </string-array>
+    <string-array name="language_values">
+        <item>en</item>
+        <item>sw</item>
+        <item>sheng</item>
+    </string-array>
+</resources>

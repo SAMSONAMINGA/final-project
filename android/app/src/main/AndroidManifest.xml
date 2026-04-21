@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Internet & Network permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Location permissions (GPS for barometer readings) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Sensor permission (barometer / pressure) -->
+    <uses-permission android:name="android.permission.ACCESS_AMBIENT_TEMPERATURE" />
+
+    <!-- Notification permission (Android 13+) FCM push alerts -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Background execution (WorkManager) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Low-battery: minimize wake lock impact -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FloodGuardKE"
+        android:name="ke.floodguard.FloodGuardApplication"
+        tools:targetApi="31">
+
+        <!-- Main Activity (Jetpack Compose entry point) -->
+        <activity
+            android:name="ke.floodguard.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FloodGuardKE">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Notification deep link intent filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="floodguard" android:host="alerts" />
+            </intent-filter>
+        </activity>
+
+        <!-- FCM Messaging Service (Firebase Cloud Messaging) -->
+        <service
+            android:name="ke.floodguard.notifications.AlertNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- WorkManager periodic uploader (barometer readings) -->
+        <!-- (Registered programmatically via PeriodicWorkRequest) -->
+
+    </application>
+
+</manifest>
