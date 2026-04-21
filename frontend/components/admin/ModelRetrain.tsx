@@ -14,9 +14,7 @@ import clsx from 'clsx';
 import { Zap } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 
-interface ModelRetrainProps {}
-
-export function ModelRetrain({}: ModelRetrainProps) {
+export function ModelRetrain() {
   const now = new Date();
   const thirtyDaysAgo = subDays(now, 30);
 

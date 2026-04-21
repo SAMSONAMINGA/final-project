@@ -36,7 +36,7 @@ export function useWebSocket({
     if (wsRef.current) return;
 
     try {
-      wsRef.current = api.connectWebSocket(
+      const socket = api.connectWebSocket(
         (event: WebSocketEvent) => {
           onMessage(event);
         },
@@ -47,13 +47,13 @@ export function useWebSocket({
         countiesCode,
       );
 
-      wsRef.current.onopen = () => {
+      socket.onopen = () => {
         setIsConnected(true);
         reconnectCountRef.current = 0;
         onConnect?.();
       };
 
-      wsRef.current.onclose = () => {
+      socket.onclose = () => {
         setIsConnected(false);
         wsRef.current = null;
 
@@ -64,6 +64,7 @@ export function useWebSocket({
           }, reconnectDelay);
         }
       };
+      wsRef.current = socket;
     } catch (error) {
       console.error('Failed to connect WebSocket:', error);
       if (autoReconnect && reconnectCountRef.current < reconnectAttempts) {
@@ -96,7 +97,7 @@ export function useWebSocket({
 
   return {
     isConnected,
-    send: (data: any) => {
+    send: (data: unknown) => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify(data));
       }

@@ -4,10 +4,12 @@
  */
 
 import NextAuth from 'next-auth';
+import type { NextAuthOptions, Session, User } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { api } from '@/lib/api';
 
-const handler = NextAuth({
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -46,7 +48,7 @@ const handler = NextAuth({
     error: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
@@ -54,7 +56,7 @@ const handler = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       session.accessToken = token.accessToken as string;
       session.refreshToken = token.refreshToken as string;
       session.isAdmin = token.isAdmin as boolean;
@@ -70,6 +72,8 @@ const handler = NextAuth({
     maxAge: 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET!,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

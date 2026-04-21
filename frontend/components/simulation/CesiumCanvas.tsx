@@ -24,6 +24,8 @@ export default function CesiumCanvas({
   containerRef,
 }: CesiumCanvasProps) {
   useEffect(() => {
+    let viewer: any;
+
     // Lazy load Cesium script to avoid bundle bloat
     const loadCesium = async () => {
       // In production, load from CDN:
@@ -43,7 +45,7 @@ export default function CesiumCanvas({
         }
 
         // Initialize Cesium viewer
-        const viewer = new Cesium.Viewer(containerRef.current, {
+        viewer = new Cesium.Viewer(containerRef.current, {
           terrainProvider: Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
             'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/ImageServer',
           ),
@@ -130,15 +132,18 @@ export default function CesiumCanvas({
           });
         });
 
-        return () => {
-          viewer.destroy();
-        };
       } catch (error) {
         console.error('Cesium initialization failed:', error);
       }
     };
 
     loadCesium();
+
+    return () => {
+      if (viewer && !viewer.isDestroyed?.()) {
+        viewer.destroy();
+      }
+    };
   }, [simulation, currentFrameIndex, containerRef]);
 
   return (

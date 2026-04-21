@@ -18,6 +18,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!frontend/lib/
+!frontend/lib/**
 parts/
 sdist/
 var/
@@ -58,6 +60,7 @@ build/
 htmlcov/
 .nyc_output/
 coverage/
+*.tsbuildinfo
 
 # Logs
 logs/

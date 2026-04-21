@@ -83,9 +83,9 @@ export function RiskGauge({
       <div
         className="w-full h-2 bg-gray-700 rounded-full overflow-hidden"
         role="progressbar"
-        aria-valuenow={String(normalized)}
-        aria-valuemin="0"
-        aria-valuemax="100"
+        aria-valuenow={normalized}
+        aria-valuemin={0}
+        aria-valuemax={100}
         aria-label={ariaLabel || 'Risk score gauge'}
       >
         <div

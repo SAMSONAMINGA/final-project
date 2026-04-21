@@ -6,9 +6,9 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { SimulationResponse, SimulationFrame } from '@/types/floodguard';
+import { SimulationResponse } from '@/types/floodguard';
 import { CardSkeleton } from '@/components/common/Skeleton';
 
 interface CesiumViewerProps {

@@ -4,90 +4,96 @@
  * Objective: Enable spatial pattern recognition with 60-min early warning lead time
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAppStore } from '@/lib/store';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { useRiskData } from '@/hooks/useRiskData';
-import { KenyaRiskMap } from '@/components/map/KenyaRiskMap';
-import { CountySidePanel } from '@/components/map/CountySidePanel';
-import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { RiskBadge } from '@/components/common/RiskBadge';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import { RiskLevel, WebSocketEvent } from '@/types/floodguard';
-import clsx from 'clsx';
+import { useState } from "react";
+import { useAppStore } from "@/lib/store";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import {
+  KenyaRiskMap,
+  type CountyFeature,
+} from "@/components/map/KenyaRiskMap";
+import { CountySidePanel } from "@/components/map/CountySidePanel";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { RiskLevel, WebSocketEvent } from "@/types/floodguard";
+import clsx from "clsx";
+
+function createCountyGeometry(index: number): GeoJSON.MultiPolygon {
+  const lng = 37 + index * 0.1;
+
+  return {
+    type: "MultiPolygon",
+    coordinates: [
+      [
+        [
+          [lng, -1],
+          [lng + 0.1, -1],
+          [lng + 0.1, -0.9],
+          [lng, -0.9],
+          [lng, -1],
+        ],
+      ],
+    ],
+  };
+}
 
 // Kenya counties GeoJSON (simplified for demo)
-const SAMPLE_COUNTIES = Array.from({ length: 47 }, (_, i) => ({
-  id: i,
-  type: 'Feature' as const,
+const SAMPLE_COUNTIES: CountyFeature[] = Array.from({ length: 47 }, (_, i) => ({
+  id: `${i}`,
+  type: "Feature" as const,
   properties: {
-    county_code: `KEN${String(i + 1).padStart(2, '0')}`,
+    county_code: `KEN${String(i + 1).padStart(2, "0")}`,
     county_name: [
-      'Mombasa',
-      'Kwale',
-      'Kilifi',
-      'Tana River',
-      'Lamu',
-      'Taita Taveta',
-      'Garissa',
-      'Wajir',
-      'Mandera',
-      'Marsabit',
-      'Isiolo',
-      'Meru',
-      'Tharaka Nithi',
-      'Embu',
-      'Kitui',
-      'Machakos',
-      'Makueni',
-      'Nairobi',
-      'Kiambu',
-      'Muranga',
-      'Nyeri',
-      'Kirinyaga',
-      'Nakuru',
-      'Narok',
-      'Kajiado',
-      'Kericho',
-      'Bomet',
-      'Kakamega',
-      'Vihiga',
-      'Bungoma',
-      'Busia',
-      'Siaya',
-      'Kisumu',
-      'Homa Bay',
-      'Migori',
-      'Kisii',
-      'Nyamira',
-      'Samburu',
-      'West Pokot',
-      'Baringo',
-      'Turkana',
-      'Trans Nzoia',
-      'Uasin Gishu',
-      'Elgeyo Marakwet',
-      'Nandi',
-      'Laikipia',
+      "Mombasa",
+      "Kwale",
+      "Kilifi",
+      "Tana River",
+      "Lamu",
+      "Taita Taveta",
+      "Garissa",
+      "Wajir",
+      "Mandera",
+      "Marsabit",
+      "Isiolo",
+      "Meru",
+      "Tharaka Nithi",
+      "Embu",
+      "Kitui",
+      "Machakos",
+      "Makueni",
+      "Nairobi",
+      "Kiambu",
+      "Muranga",
+      "Nyeri",
+      "Kirinyaga",
+      "Nakuru",
+      "Narok",
+      "Kajiado",
+      "Kericho",
+      "Bomet",
+      "Kakamega",
+      "Vihiga",
+      "Bungoma",
+      "Busia",
+      "Siaya",
+      "Kisumu",
+      "Homa Bay",
+      "Migori",
+      "Kisii",
+      "Nyamira",
+      "Samburu",
+      "West Pokot",
+      "Baringo",
+      "Turkana",
+      "Trans Nzoia",
+      "Uasin Gishu",
+      "Elgeyo Marakwet",
+      "Nandi",
+      "Laikipia",
     ][i],
   },
-  geometry: {
-  type: "MultiPolygon",
-  coordinates: [
-    [ // polygon
-      [ // outer ring
-        [37 + i * 0.1, -1],
-        [37.1 + i * 0.1, -1],
-        [37.1 + i * 0.1, -0.9],
-        [37 + i * 0.1, -0.9],
-        [37 + i * 0.1, -1]
-      ]
-    ]
-  ]
-}
+  geometry: createCountyGeometry(i),
 }));
 
 export default function DashboardPage() {
@@ -96,16 +102,13 @@ export default function DashboardPage() {
   const [riskLevels, setRiskLevels] = useState<Record<string, RiskLevel>>({});
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch risk data for selected county
-  const { data: riskData } = useRiskData(selectedCountyCode);
-
   // WebSocket subscription for live updates
   useWebSocket({
     onMessage: (event: WebSocketEvent) => {
-      if (event.event === 'alert') {
+      if (event.event === "alert") {
         addAlert({
-          type: event.risk_level || 'High',
-          message: event.message || 'Flood alert received',
+          type: event.risk_level || "High",
+          message: event.message || "Flood alert received",
         });
       }
 
@@ -132,12 +135,12 @@ export default function DashboardPage() {
         const rand = Math.random();
         const level: RiskLevel =
           rand < 0.5
-            ? 'Low'
+            ? "Low"
             : rand < 0.8
-            ? 'Medium'
-            : rand < 0.95
-            ? 'High'
-            : 'Critical';
+              ? "Medium"
+              : rand < 0.95
+                ? "High"
+                : "Critical";
         newRisks[county.properties.county_code] = level;
       });
       setRiskLevels(newRisks);
@@ -187,19 +190,16 @@ export default function DashboardPage() {
                   onClick={handleRefresh}
                   disabled={refreshing}
                   className={clsx(
-                    'mt-3 w-full px-3 py-2 rounded text-xs font-semibold',
-                    'bg-savanna-gold/20 text-savanna-gold hover:bg-savanna-gold/30',
-                    'transition disabled:opacity-50',
-                    'flex items-center justify-center gap-2',
+                    "mt-3 w-full px-3 py-2 rounded text-xs font-semibold",
+                    "bg-savanna-gold/20 text-savanna-gold hover:bg-savanna-gold/30",
+                    "transition disabled:opacity-50",
+                    "flex items-center justify-center gap-2",
                   )}
                 >
                   <RefreshCw
-                    className={clsx(
-                      'w-3 h-3',
-                      refreshing && 'animate-spin',
-                    )}
+                    className={clsx("w-3 h-3", refreshing && "animate-spin")}
                   />
-                  {refreshing ? 'Refreshing...' : 'Refresh Data'}
+                  {refreshing ? "Refreshing..." : "Refresh Data"}
                 </button>
               </div>
             </div>

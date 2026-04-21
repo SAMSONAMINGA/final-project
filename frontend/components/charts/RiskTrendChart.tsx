@@ -26,14 +26,17 @@ interface RiskTrendChartProps {
  * Generate synthetic 6h trend data for demonstration
  * In production, this would fetch from /risk/{county_code}/history endpoint
  */
-function generateTrendData() {
+function generateTrendData(countyCode: string) {
   const now = new Date();
   const data = [];
+  const countySeed =
+    countyCode.split('').reduce((total, char) => total + char.charCodeAt(0), 0) %
+    10;
 
   for (let i = 6; i >= 0; i--) {
     const timestamp = subHours(now, i);
     // Simulate realistic risk progression with noise
-    const baseRisk = 0.3 + Math.sin(i / 3.5) * 0.2;
+    const baseRisk = 0.3 + Math.sin((i + countySeed) / 3.5) * 0.2;
     const noise = (Math.random() - 0.5) * 0.1;
     const risk = Math.max(0, Math.min(1, baseRisk + noise));
 
@@ -48,7 +51,7 @@ function generateTrendData() {
 }
 
 export function RiskTrendChart({ countyCode }: RiskTrendChartProps) {
-  const data = useMemo(() => generateTrendData(), []);
+  const data = useMemo(() => generateTrendData(countyCode), [countyCode]);
 
   const currentRisk = data[data.length - 1]?.risk || 0;
   const previousRisk = data[data.length - 2]?.risk || 0;

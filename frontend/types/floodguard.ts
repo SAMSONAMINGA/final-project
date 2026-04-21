@@ -205,11 +205,7 @@ export interface Session {
 
 // GeoJSON types (for TypeScript safety)
 namespace GeoJSON {
-  export interface Position extends Array<number> {
-    0: number;
-    1: number;
-    2?: number;
-  }
+  export type Position = [number, number] | [number, number, number];
 
   export interface Point {
     type: 'Point';

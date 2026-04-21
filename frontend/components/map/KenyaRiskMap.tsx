@@ -7,23 +7,23 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useAppStore } from '@/lib/store';
 import { RiskLevel } from '@/types/floodguard';
-import clsx from 'clsx';
 
-interface CountyFeature {
-  id: string;
+export interface CountyFeature {
+  id: string | number;
+  type: 'Feature';
   properties: {
     county_code: string;
     county_name: string;
     risk_level?: RiskLevel;
     risk_score?: number;
   };
-  geometry: any;
+  geometry: GeoJSON.Geometry;
 }
 
 interface KenyaRiskMapProps {
@@ -76,7 +76,7 @@ export function KenyaRiskMap({
         type: 'geojson',
         data: {
           type: 'FeatureCollection',
-          features: counties,
+          features: counties as GeoJSON.Feature[],
         },
       });
 
@@ -155,7 +155,10 @@ export function KenyaRiskMap({
               { hover: false },
             );
           }
-          hoveredStateId = e.features[0].id;
+          const featureId = e.features[0].id;
+          if (featureId === undefined) return;
+
+          hoveredStateId = featureId;
           map.current!.setFeatureState(
             { source: 'counties', id: hoveredStateId },
             { hover: true },
@@ -178,9 +181,11 @@ export function KenyaRiskMap({
       // Click to select county
       map.current!.on('click', 'counties-fill', (e) => {
         if (e.features && e.features.length > 0) {
-          const countyCode = e.features[0].properties.county_code;
-          setSelectedCountyCode(countyCode);
-          onCountySelect(countyCode);
+          const countyCode = e.features[0].properties?.county_code;
+          if (typeof countyCode === 'string') {
+            setSelectedCountyCode(countyCode);
+            onCountySelect(countyCode);
+          }
         }
       });
     });
@@ -210,9 +215,10 @@ export function KenyaRiskMap({
 
   // Highlight selected county
   useEffect(() => {
-    if (!map.current) return;
+    const currentMap = map.current;
+    if (!currentMap) return;
 
-    map.current.setPaintProperty(
+    currentMap.setPaintProperty(
       'counties-border',
       'line-width',
       [
@@ -239,7 +245,7 @@ export function KenyaRiskMap({
       if (feature && feature.geometry) {
         const bbox = calculateBbox(feature.geometry);
         if (bbox) {
-          map.current.fitBounds(bbox, { padding: 40, duration: 800 });
+          currentMap.fitBounds(bbox, { padding: 40, duration: 800 });
         }
       }
     }
