@@ -4,7 +4,12 @@
  * Objective: Enable 3D Cesium visualization with playback controls
  */
 
-import { useMutation, useQuery, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  UseMutationResult,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { SimulationResponse } from '@/types/floodguard';
 import { api } from '@/lib/api';
 
@@ -24,7 +29,11 @@ export function useSimulation(
   });
 }
 
-export function useTriggerSimulation() {
+export function useTriggerSimulation(): UseMutationResult<
+  SimulationResponse,
+  Error,
+  string
+> {
   return useMutation({
     mutationFn: async (countyCode: string) => {
       return api.triggerSimulation(countyCode, 3, 5);
